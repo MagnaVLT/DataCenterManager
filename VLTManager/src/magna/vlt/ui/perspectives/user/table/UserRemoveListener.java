@@ -1,0 +1,101 @@
+package magna.vlt.ui.perspectives.user.table;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+import magna.vlt.db.retriever.DBWrapper;
+import magna.vlt.ui.perspectives.user.data.Employee;
+
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
+
+public class UserRemoveListener extends DBWrapper implements SelectionListener{
+	private Table table;
+	
+	public UserRemoveListener(Table table){
+		this.table = table;
+	}
+	
+	public UserRemoveListener(){
+		
+	}
+	
+	@Override
+	public void widgetSelected(SelectionEvent e) {
+		doEvent();
+	}
+
+	public void doEvent() {
+		removeAll();
+	}
+
+	private void removeAll() {
+		// TODO Auto-generated method stub
+		String id = getID();
+		this.remove(id);
+	}
+
+	public void remove(String id) {
+		removeRelationships(id);
+		removeUser(id);
+	}
+	
+	private void removeUser(String id){
+		
+				
+		String query = "delete from users_project_map where userid = '"  + id + "';";
+		super.execute(query);
+		query = "delete from users_feature_project_map where userid = '"  + id + "';";
+		super.execute(query);
+		query = "delete from user_relationships where userid = '"  + id + "';";
+		super.execute(query);
+		
+		query = "SET FOREIGN_KEY_CHECKS=0;";
+		super.execute(query);
+		query = "delete from user_log where userid = '"  + id + "';";
+		super.execute(query);
+		query = "SET FOREIGN_KEY_CHECKS=1;";
+		super.execute(query);
+		
+		
+		query = "delete from users where id = '"  + id + "';";
+		super.execute(query);
+	}
+
+	private void removeRelationships(String id) {
+		ArrayList<String> childId = new ArrayList<String>();
+		String query = "select userid, managerid from user_relationships where managerid = '"  + id + "';";
+		ResultSet rs = super.getResultSet(query);
+		
+		try {
+			while(rs.next()){
+				String userId = rs.getString("userid");
+				childId.add(userId);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		for(String child: childId){
+			this.remove(child);
+		}
+		
+	}
+
+	private String getID() {
+		TableItem[] items = this.table.getSelection();
+	    return ((Employee)items[0].getData()).getId();
+	}
+
+	
+	@Override
+	public void widgetDefaultSelected(SelectionEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}
