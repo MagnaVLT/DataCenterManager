@@ -12,8 +12,9 @@ import magna.vlt.db.connection.DBInfo;
 
 public class DBWrapper {
 	protected DBWrapper(){
-		DBConnector.getConnection(new DBInfo("jdbc:mysql://10.64.231.50:3306/fcm_gen3_hil_playback" + "?zeroDateTimeBehavior=convertToNull", "root", "Magnatkfkd"));
-//		DBConnector.getConnection(new DBInfo("jdbc:mysql://localhost:3306/fcm_gen3_hil_playback" + "?zeroDateTimeBehavior=convertToNull", "root", "hil"));
+//		DBConnector.getConnection(new DBInfo("jdbc:mysql://10.64.231.50:3306/fcm_gen3_hil_playback" + "?zeroDateTimeBehavior=convertToNull", "root", "Magnatkfkd"));
+//		DBConnector.getConnection(new DBInfo("jdbc:mysql://10.64.231.50:3306/dev_hil_playback" + "?zeroDateTimeBehavior=convertToNull", "root", "Magnatkfkd"));
+		DBConnector.getConnection(new DBInfo("jdbc:mysql://localhost:3306/fcm_gen3_hil_playback" + "?zeroDateTimeBehavior=convertToNull", "root", "hil"));
 //		DBConnector.getConnection(new DBInfo("jdbc:mysql://192.168.0.9:3306/fcm_gen3_hil_playback" + "?zeroDateTimeBehavior=convertToNull", "root", "dkagh"));
 	}
 	

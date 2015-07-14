@@ -632,7 +632,6 @@ public class ProjectManager extends ViewPart {
 					total = featureIdList.length + 5;
 					int cnt=0;
 					for(int i = 0; i < featureIdList.length ; i++) {
-
 						Table featureTable = tbl_featureViewer.getTable();
 						for(int k = 0 ; k < featureTable.getItemCount(); k++){
 							if(((Feature)featureTable.getItem(k).getData()).getId()==Integer.valueOf(featureIdList[i])){

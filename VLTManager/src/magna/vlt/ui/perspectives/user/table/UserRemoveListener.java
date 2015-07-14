@@ -5,12 +5,16 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import magna.vlt.db.retriever.DBWrapper;
+import magna.vlt.ui.perspectives.user.UserListView;
 import magna.vlt.ui.perspectives.user.data.Employee;
 
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 public class UserRemoveListener extends DBWrapper implements SelectionListener{
 	private Table table;
@@ -29,37 +33,46 @@ public class UserRemoveListener extends DBWrapper implements SelectionListener{
 	}
 
 	public void doEvent() {
+		
 		removeAll();
+		try {
+			IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(UserListView.ID);
+			((UserListView)view).refresh(false);
+		} catch (PartInitException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void removeAll() {
-		// TODO Auto-generated method stub
 		String id = getID();
 		this.remove(id);
 	}
 
 	public void remove(String id) {
-		removeRelationships(id);
+		super.execute("SET foreign_key_checks = 0;");
 		removeUser(id);
+		removeRelationships(id);
+		super.execute("SET foreign_key_checks = 1;");
+		
+		
+	}
+	
+	public void update(String id) {
+		super.execute("SET foreign_key_checks = 0;");
+		removeUser(id);
+		super.execute("SET foreign_key_checks = 1;");
 	}
 	
 	private void removeUser(String id){
 		
-				
 		String query = "delete from users_project_map where userid = '"  + id + "';";
 		super.execute(query);
 		query = "delete from users_feature_project_map where userid = '"  + id + "';";
 		super.execute(query);
 		query = "delete from user_relationships where userid = '"  + id + "';";
 		super.execute(query);
-		
-		query = "SET FOREIGN_KEY_CHECKS=0;";
-		super.execute(query);
 		query = "delete from user_log where userid = '"  + id + "';";
 		super.execute(query);
-		query = "SET FOREIGN_KEY_CHECKS=1;";
-		super.execute(query);
-		
 		
 		query = "delete from users where id = '"  + id + "';";
 		super.execute(query);

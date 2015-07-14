@@ -21,7 +21,11 @@ public class EmployeeCreator extends DBWrapper{
 	}
 	
 	private void insertEmployeeToDatabase(Employee employee){
-		if(isExistUser(employee.getId())){
+		
+		
+		if(this.isExistUser(employee.getId())){
+			new UserRemoveListener().update(employee.getId());
+		}else{
 			new UserRemoveListener().remove(employee.getId());
 		}
 		
@@ -46,6 +50,7 @@ public class EmployeeCreator extends DBWrapper{
 	}
 	
 	private void insertToUserRelationshipTable(Employee employee){
+
 		if(employee.getPrivilege().equals("2")){
 			String query = "insert into user_relationships (userid, managerid) values (";
 			query += "'" + employee.getId() + "', ";
@@ -59,9 +64,6 @@ public class EmployeeCreator extends DBWrapper{
 				super.execute(query);
 			}
 		}
-		
-		
-		
 	}
 	
 	private void insertToFeaureUserMapTable(Employee employee) {

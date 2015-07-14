@@ -31,7 +31,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Text;
@@ -139,6 +138,9 @@ public class UserManagerView extends ViewPart {
 			}else if(privilege.equals("4")){
 				this.list.deselectAll();
 				query+= "privilege = 3;";
+			}else if(privilege.equals("5")){
+				this.list.selectAll();
+				query+= "privilege = 2; ";
 			}else{
 				return;
 			}
@@ -303,7 +305,9 @@ public class UserManagerView extends ViewPart {
 					String locationId = Tokenizer.getToken(cboLocation.getText(), "-", 0);
 					ArrayList<String> managerId = getManagerId();					
 					ArrayList<String> managerName = getManagerNames(managerId);
+					
 					list_select.selectAll();
+					
 					String[] selectedItems = list_select.getItems();
 					String[] featureList = new String[selectedItems.length];
 					String[] projectList = new String[selectedItems.length];
@@ -312,6 +316,7 @@ public class UserManagerView extends ViewPart {
 					if(privilegeId.equals("") || locationId.equals("") || selectedItems.length==0 || 
 							(!privilegeId.equals("2") && managerId.size()==0)){
 						message.showErrorBox(parent, "Warning", "All the fields should be filled in.", MessageDialog.ERROR, bottons);
+					
 					}else if(txtID.getText().length()>6){
 						message.showErrorBox(parent, "Warning", "ID is not correct.", MessageDialog.ERROR, bottons);
 					}else if(!editingMode && check(txtID.getText())){
@@ -501,6 +506,12 @@ public class UserManagerView extends ViewPart {
 				list_select.setEnabled(true);
 				ArrayList<String> superviserID = getManagerId();
 				listFeaturesOfUser(projectID, superviserID);
+			}else if(privilege.equals("5")){
+				list_project.setEnabled(true);
+				listFeaturesOfAllOfProject(projectID, true);
+				String[] allFeatures = list.getItems();
+				list_select.setItems(allFeatures);
+				list.selectAll();
 			}
 		}
 	}
