@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
 	<section name="ProductExportWizard">
+		<item value="/VLTManager/VLTManager.product" key="productConfig1"/>
+		<item value="true" key="syncProduct"/>
+		<item value="false" key="exportSource"/>
 		<item value="Generate source bundles" key="exportSourceFormat"/>
 		<item value="true" key="p2metadata"/>
-		<item value="/VLTManager/VLTManager.product" key="productConfig0"/>
-		<item value="VLTManager" key="productRoot"/>
-		<item value="false" key="exportSource"/>
-		<item value="true" key="syncProduct"/>
-		<item value="/VLTManager/VLTManager.product" key="productConfig1"/>
 		<item value="C:\Users\e39050\Documents\VLTManager v1.0" key="destination5"/>
 		<item value="C:\Users\e39050\Documents\VLTManager v0.93" key="destination4"/>
-		<item value="C:\Users\e39050\Documents\VLTManager v0.94" key="destination3"/>
 		<item value="true" key="exportDirectory"/>
+		<item value="C:\Users\e39050\Documents\VLTManager v0.94" key="destination3"/>
 		<item value="C:\Users\e39050\Documents\VLTManager v0.95" key="destination2"/>
+		<item value="/VLTManager/VLTManager.product" key="productConfig0"/>
 		<item value="C:\Users\e39050\Documents\VLTManager v0.96" key="destination1"/>
-		<item value="C:\Users\e39050\Documents\VLTManager v0.96" key="destination0"/>
+		<item value="C:\Users\e39050\Documents\VLTManager v0.97" key="destination0"/>
 		<item value="true" key="allowBinaryCycles"/>
+		<item value="VLTManager" key="productRoot"/>
 	</section>
 	<section name="quick_assist_proposal_size">
 	</section>

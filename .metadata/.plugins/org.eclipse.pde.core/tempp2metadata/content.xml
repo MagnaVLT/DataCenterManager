@@ -2,7 +2,7 @@
 <?metadataRepository version='1.1.0'?>
 <repository name='file:/C:/Users/e39050/Documents/GitHub/DataCenterManager/.metadata/.plugins/org.eclipse.pde.core/tempp2metadata - metadata' type='org.eclipse.equinox.internal.p2.metadata.repository.LocalMetadataRepository' version='1.0.0'>
   <properties size='2'>
-    <property name='p2.timestamp' value='1436804563372'/>
+    <property name='p2.timestamp' value='1436914951512'/>
     <property name='p2.compressed' value='false'/>
   </properties>
   <references size='4'>
@@ -224,34 +224,6 @@
         <instructions size='1'>
           <instruction key='manifest'>
             Bundle-SymbolicName: org.w3c.css.sac&#xA;Bundle-Version: 1.3.1.v200903091627
-          </instruction>
-        </instructions>
-      </touchpointData>
-    </unit>
-    <unit id='VLTManager' version='1.0.0.201507131222'>
-      <update id='VLTManager' range='[0.0.0,1.0.0.201507131222)' severity='0'/>
-      <properties size='2'>
-        <property name='org.eclipse.equinox.p2.name' value='VLT-Manager'/>
-        <property name='org.eclipse.equinox.p2.provider' value='Magna Electronics'/>
-      </properties>
-      <provides size='3'>
-        <provided namespace='org.eclipse.equinox.p2.iu' name='VLTManager' version='1.0.0.201507131222'/>
-        <provided namespace='osgi.bundle' name='VLTManager' version='1.0.0.201507131222'/>
-        <provided namespace='org.eclipse.equinox.p2.eclipse.type' name='bundle' version='1.0.0'/>
-      </provides>
-      <requires size='3'>
-        <required namespace='osgi.bundle' name='org.eclipse.ui' range='0.0.0'/>
-        <required namespace='osgi.bundle' name='org.eclipse.core.runtime' range='0.0.0'/>
-        <required namespace='osgi.bundle' name='org.eclipse.e4.ui.di' range='1.0.0'/>
-      </requires>
-      <artifacts size='1'>
-        <artifact classifier='osgi.bundle' id='VLTManager' version='1.0.0.201507131222'/>
-      </artifacts>
-      <touchpoint id='org.eclipse.equinox.p2.osgi' version='1.0.0'/>
-      <touchpointData size='1'>
-        <instructions size='1'>
-          <instruction key='manifest'>
-            Bundle-SymbolicName: VLTManager;singleton:=true&#xA;Bundle-Version: 1.0.0.201507131222
           </instruction>
         </instructions>
       </touchpointData>
@@ -718,6 +690,34 @@
           </instruction>
           <instruction key='configure'>
             setProgramProperty(propName:equinox.use.ds, propValue:true);
+          </instruction>
+        </instructions>
+      </touchpointData>
+    </unit>
+    <unit id='VLTManager' version='1.0.0.201507141902'>
+      <update id='VLTManager' range='[0.0.0,1.0.0.201507141902)' severity='0'/>
+      <properties size='2'>
+        <property name='org.eclipse.equinox.p2.name' value='VLT-Manager'/>
+        <property name='org.eclipse.equinox.p2.provider' value='Magna Electronics'/>
+      </properties>
+      <provides size='3'>
+        <provided namespace='org.eclipse.equinox.p2.iu' name='VLTManager' version='1.0.0.201507141902'/>
+        <provided namespace='osgi.bundle' name='VLTManager' version='1.0.0.201507141902'/>
+        <provided namespace='org.eclipse.equinox.p2.eclipse.type' name='bundle' version='1.0.0'/>
+      </provides>
+      <requires size='3'>
+        <required namespace='osgi.bundle' name='org.eclipse.ui' range='0.0.0'/>
+        <required namespace='osgi.bundle' name='org.eclipse.core.runtime' range='0.0.0'/>
+        <required namespace='osgi.bundle' name='org.eclipse.e4.ui.di' range='1.0.0'/>
+      </requires>
+      <artifacts size='1'>
+        <artifact classifier='osgi.bundle' id='VLTManager' version='1.0.0.201507141902'/>
+      </artifacts>
+      <touchpoint id='org.eclipse.equinox.p2.osgi' version='1.0.0'/>
+      <touchpointData size='1'>
+        <instructions size='1'>
+          <instruction key='manifest'>
+            Bundle-SymbolicName: VLTManager;singleton:=true&#xA;Bundle-Version: 1.0.0.201507141902
           </instruction>
         </instructions>
       </touchpointData>
@@ -1775,7 +1775,6 @@
       <requires size='81'>
         <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.e4.core.di' range='[1.4.0.v20140414-1837,1.4.0.v20140414-1837]'/>
         <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.e4.core.commands' range='[0.10.2.v20140424-2344,0.10.2.v20140424-2344]'/>
-        <required namespace='org.eclipse.equinox.p2.iu' name='VLTManager' range='[1.0.0.201507131222,1.0.0.201507131222]'/>
         <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.e4.core.services' range='[1.2.1.v20140808-1251,1.2.1.v20140808-1251]'/>
         <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.core.resources.win32.x86_64' range='[3.5.0.v20140124-1940,3.5.0.v20140124-1940]'>
           <filter>
@@ -1857,6 +1856,7 @@
         <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.core.resources' range='[3.9.1.v20140825-1431,3.9.1.v20140825-1431]'/>
         <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.e4.ui.services' range='[1.1.0.v20140328-1925,1.1.0.v20140328-1925]'/>
         <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.e4.ui.workbench.renderers.swt' range='[0.12.2.v20150204-1353,0.12.2.v20150204-1353]'/>
+        <required namespace='org.eclipse.equinox.p2.iu' name='VLTManager' range='[1.0.0.201507141902,1.0.0.201507141902]'/>
         <required namespace='org.eclipse.equinox.p2.iu' name='org.w3c.css.sac' range='[1.3.1.v200903091627,1.3.1.v200903091627]'/>
         <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.core.variables' range='[3.2.800.v20130819-1716,3.2.800.v20130819-1716]'/>
         <required namespace='org.eclipse.equinox.p2.iu' name='config.a.jre.javase' range='[1.6.0,1.6.0]'/>
@@ -2522,7 +2522,7 @@
             (&amp;(osgi.arch=x86_64)(osgi.os=win32)(osgi.ws=win32))
           </filter>
         </required>
-        <required namespace='org.eclipse.equinox.p2.iu' name='VLTManager' range='[1.0.0.201507131222,1.0.0.201507131222]'>
+        <required namespace='org.eclipse.equinox.p2.iu' name='VLTManager' range='[1.0.0.201507141902,1.0.0.201507141902]'>
           <filter>
             (&amp;(osgi.arch=x86_64)(osgi.os=win32)(osgi.ws=win32))
           </filter>

@@ -1,0 +1,713 @@
+package magna.vlt.ui.perspectives.user;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import magna.vlt.ui.common.GUIInfoRetriever;
+import magna.vlt.ui.common.UIHelper;
+import magna.vlt.ui.common.VTJob;
+import magna.vlt.ui.common.VTProgressBar;
+import magna.vlt.ui.perspectives.user.data.Employee;
+import magna.vlt.ui.perspectives.user.data.EmployeeCreator;
+import magna.vlt.ui.perspectives.user.data.EmployeeRetriever;
+import magna.vlt.util.MessageBox;
+import magna.vlt.util.Tokenizer;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.ViewPart;
+
+public class UserManagerView extends ViewPart {
+	public final static String ID = "magna.vlt.ui.AuthPerspective.AuthView";
+	
+	private Text txtID;
+	private Text txt_firstName;
+	private Combo cboPrivilege;
+	private Combo cboLocation;
+	private Button btnSubmit;
+	private GUIInfoRetriever initializer;
+	private List list;
+	private ListViewer featureList;
+	private Label lblNewLabel_1;
+	private Text txt_lastname;
+	private Label lblProject;
+	private List list_project;
+	private ListViewer listViewer;
+	private Label lblSelectedProject;
+	private List list_select;
+	private ListViewer listViewer_1;
+	private UIHelper helper = new UIHelper();
+	private boolean needRefreash = true;
+	private MessageBox message;
+	private Composite parent;
+	private Button btnNewButton;
+	private List list_manager;
+	private ListViewer lv_manager;
+	private List list_selected_manager;
+	private ListViewer lv_selected_manager;
+	private boolean editingMode = false;
+	
+	public UserManagerView() {
+		message = new MessageBox();
+		initializer = new GUIInfoRetriever(); 
+	}
+
+	@Override
+	public void createPartControl(Composite parent) {
+		this.parent = parent;
+		draw(parent);
+		new Label(parent, SWT.NONE);
+		new Label(parent, SWT.NONE);
+		new Label(parent, SWT.NONE);
+		new Label(parent, SWT.NONE);
+		new Label(parent, SWT.NONE);
+		new Label(parent, SWT.NONE);
+		initGUIControls();
+		addListener();
+	}
+	
+	private void initGUIControls() {
+
+		needRefreash = false;
+		initPrivilege();
+		list_selected_manager.removeAll();
+		initSupervisor("0");
+		initLocation();
+		initProject(null);
+		
+		list.removeAll();
+		list_select.removeAll();
+		txtID.setText("");
+		txt_firstName.setText("");
+		txt_lastname.setText("");
+		txtID.setFocus();
+		needRefreash = true;
+	}
+	
+	private void initLocation() {
+		Hashtable<Integer, String> table = initializer.getIdNamePairList("id", "name", "location");
+		helper.initCombo(this.cboLocation, table);
+	}
+
+
+	private void initProject(ArrayList<String> superviser) {
+		String query = "";
+		if(superviser != null){
+			query = "select a.id, a.name as projectname, a.ownerid from project a, users_project_map b where a.isopen = 0 "
+					+ " and a.id = b.projectid and b.userid in (";
+			for(int i = 0 ; i < superviser.size()-1; i++){
+				String id = superviser.get(i);
+				query +="'" + id + "', ";
+			}
+			String id = superviser.get(superviser.size()-1);
+			query +="'" + id + "')";
+			
+		}else{
+			query = "select id, name as projectname, ownerid from project where isopen = 0";
+		}
+		
+		Hashtable<Integer, String> table = initializer.getTripledList(query, "id", "projectname", "ownerid");
+		helper.initList(this.list_project, table, true);
+	}
+	
+	private void initSupervisor(String privilege) {
+		if(!privilege.equals("")){
+			String query = "select id, concat(firstname, ' ', lastname) as name from users where ";
+			if(privilege.equals("1")||privilege.equals("2")||privilege.equals("3")){
+				this.list.selectAll();
+				this.list_manager.removeAll();
+				this.list_selected_manager.removeAll();
+				return;
+			}else if(privilege.equals("4")){
+				this.list.deselectAll();
+				query+= "privilege = 2 or privilege = 3; ";			
+			}else{
+				return;
+			}
+			
+			Hashtable<String, String> table = initializer.getPairedList(query, "id", "name");
+			helper.initList(this.list_manager, table);
+		}
+	}
+
+	private void initPrivilege() {
+		Hashtable<Integer, String> table = initializer.getIdNamePairList("id", "name", "privilege");
+		helper.initCombo(this.cboPrivilege, table);
+	}
+
+	private void draw(Composite parent) {
+		parent.setLayout(new GridLayout(10, false));
+		
+		Label lblName = new Label(parent, SWT.NONE);
+		lblName.setText("ID");
+		
+		txtID = new Text(parent, SWT.BORDER);
+		GridData gd_txtID = new GridData(SWT.FILL, SWT.CENTER, true, true, 9, 1);
+		gd_txtID.widthHint = 516;
+		txtID.setLayoutData(gd_txtID);
+		
+		Label lblName_1 = new Label(parent, SWT.NONE);
+		lblName_1.setText("First Name");
+		
+		txt_firstName = new Text(parent, SWT.BORDER);
+		txt_firstName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 9, 1));
+		
+		lblNewLabel_1 = new Label(parent, SWT.NONE);
+		lblNewLabel_1.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblNewLabel_1.setText("Last Name");
+		
+		txt_lastname = new Text(parent, SWT.BORDER);
+		txt_lastname.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 9, 1));
+		
+		Label lblConfirm = new Label(parent, SWT.NONE);
+		lblConfirm.setText("Privilege");
+		
+		cboPrivilege = new Combo(parent, SWT.READ_ONLY);
+		
+				cboPrivilege.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 9, 1));
+		
+		Label lblLocation = new Label(parent, SWT.NONE);
+		lblLocation.setText("Location");
+		
+		cboLocation = new Combo(parent, SWT.READ_ONLY);
+		cboLocation.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 9, 1));
+		
+		Label lblManager = new Label(parent, SWT.NONE);
+		lblManager.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 2));
+		lblManager.setText("Supervisor");
+		
+		lv_manager = new ListViewer(parent, SWT.BORDER | SWT.V_SCROLL);
+		list_manager = lv_manager.getList();
+		list_manager.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 3, 2));
+		
+		lv_selected_manager = new ListViewer(parent, SWT.BORDER | SWT.V_SCROLL);
+		list_selected_manager = lv_selected_manager.getList();
+		list_selected_manager.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 6, 2));
+		
+		lblProject = new Label(parent, SWT.NONE);
+		lblProject.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		lblProject.setText("Project");
+		
+		listViewer = new ListViewer(parent, SWT.BORDER | SWT.MULTI| SWT.H_SCROLL | SWT.V_SCROLL);
+		list_project = listViewer.getList();
+
+		GridData gd_list_project = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
+		gd_list_project.widthHint = 93;
+		gd_list_project.heightHint = 80;
+		list_project.setLayoutData(gd_list_project);
+		
+		Label lblFeature = new Label(parent, SWT.NONE);
+		GridData gd_lblFeature = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		gd_lblFeature.widthHint = 53;
+		lblFeature.setLayoutData(gd_lblFeature);
+		lblFeature.setText("Feature");
+		
+		featureList = new ListViewer(parent, SWT.BORDER | SWT.MULTI| SWT.H_SCROLL | SWT.V_SCROLL);
+		list = featureList.getList();
+
+		GridData gd_list = new GridData(SWT.FILL, SWT.FILL, true, true, 7, 1);
+		gd_list.widthHint = 301;
+		gd_list.heightHint = 80;
+		list.setLayoutData(gd_list);
+		
+		lblSelectedProject = new Label(parent, SWT.NONE);
+		lblSelectedProject.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 3, 1));
+		lblSelectedProject.setText("Selected Project - Feature List");
+		
+		listViewer_1 = new ListViewer(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+		list_select = listViewer_1.getList();
+
+		list_select.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 7, 1));
+		new Label(parent, SWT.NONE);
+		
+		btnNewButton = new Button(parent, SWT.NONE);
+
+		btnNewButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
+		btnNewButton.setText("Clear");
+		
+		btnSubmit = new Button(parent, SWT.NONE);
+		
+				GridData gd_btnSubmit = new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1);
+				gd_btnSubmit.widthHint = 128;
+				btnSubmit.setLayoutData(gd_btnSubmit);
+				btnSubmit.setText("Submit");
+	}
+	private boolean isExist(String selectedItem){
+		for(int i = 0 ; i < list_selected_manager.getItemCount() ; i++){
+			String curText = list_selected_manager.getItem(i);
+			if(selectedItem.equals(curText)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private void addManager(int index) {
+		String item = list_manager.getItem(index);
+		if(!isExist(item))
+			list_selected_manager.add(item);
+	}
+	
+	public void addListener()
+	{
+		list_manager.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {
+				addManager(list_manager.getSelectionIndex());
+				ArrayList<String> supervisers = getManagerId();
+				if(!supervisers.isEmpty()){
+					initProject(supervisers);
+					Hashtable<Integer, String> table = new Hashtable<Integer, String>();
+					helper.initList(list, table, true);
+					helper.initList(list_select, table, true);
+				}else{
+					initProject(null);
+				}
+			}
+			
+		});
+		
+		list_selected_manager.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {
+				list_selected_manager.remove(list_selected_manager.getSelectionIndex());
+				ArrayList<String> supervisers = getManagerId();
+				if(!supervisers.isEmpty()){
+					initProject(supervisers);
+				}else{
+					initProject(null);
+				}
+				
+			}
+		});
+		
+		btnNewButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				clear();
+			}
+		});
+		
+		btnSubmit.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				
+				try {
+					String privilegeId = Tokenizer.getToken(cboPrivilege.getText(), "-", 0);
+					String privilegeName = Tokenizer.getToken(cboPrivilege.getText(), "-", 1);
+					String locationId = Tokenizer.getToken(cboLocation.getText(), "-", 0);
+					ArrayList<String> managerId = getManagerId();					
+					ArrayList<String> managerName = getManagerNames(managerId);
+					
+					list_select.selectAll();
+					
+					String[] selectedItems = list_select.getItems();
+					String[] featureList = new String[selectedItems.length];
+					String[] projectList = new String[selectedItems.length];
+					String[] bottons = {"Confirm"};
+					
+					if(privilegeId.equals("") || locationId.equals("") || selectedItems.length==0 || 
+							(privilegeId.equals("4") && managerId.size()==0)){
+						message.showErrorBox(parent, "Warning", "All the fields have to be filled in.", MessageDialog.ERROR, bottons);
+					
+					}else if(txtID.getText().length()>6){
+						message.showErrorBox(parent, "Warning", "ID is not correct.", MessageDialog.ERROR, bottons);
+					}else if(!editingMode && check(txtID.getText())){
+						message.showErrorBox(parent, "Warning", "The ID already exist.", MessageDialog.ERROR, bottons);
+					}else{
+						update(privilegeId, privilegeName, managerId, locationId, txtID.getText(), managerName, selectedItems, featureList, projectList);
+						referesh();
+						
+						IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(UserListView.ID);
+						((UserListView)view).refresh(false);
+					}
+
+				} catch (PartInitException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+
+			private ArrayList<String> getManagerNames(ArrayList<String> managerId) {
+				ArrayList<String> managerNames = new ArrayList<String>();
+				for(String curId: managerId){
+					String query = "select concat(firstName, ' ', lastName) as name from users where id ='" + curId + "';";
+					managerNames.add(initializer.getName(query));
+				}
+				
+				return managerNames;
+			}
+
+
+			private void update(String privilegeId, String privilegeName, ArrayList<String> managerId,
+					String locationId, String password, ArrayList<String> superviserName,
+					String[] selectedItems, String[] featureList,
+					String[] projectList) throws PartInitException {
+				
+				for(int i = 0 ; i < selectedItems.length ;i++){
+					String item = selectedItems[i];
+					featureList[i] = Tokenizer.getToken(item, "-", 0);
+					projectList[i] = Tokenizer.getToken(item, "-", 3);
+				}
+				
+				new EmployeeCreator().createEmployee(txtID.getText(), txt_firstName.getText(), txt_lastname.getText(), 
+						privilegeId, privilegeName, managerId, superviserName, locationId, password, featureList, projectList);
+			}
+
+			private void referesh() throws PartInitException {
+				initGUIControls();
+//				IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(UserTreeView.ID);
+//				((UserTreeView)view).refresh();
+			}
+			
+			private boolean check(String id){
+				return initializer.checkId(id);
+			}
+		});
+		
+		list_project.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				refreashFeatureList();
+			}
+		});
+		
+		list.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {
+				addFeature(list.getSelectionIndex());
+			}
+
+		});
+		
+		list_select.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {
+				if(list_select.getSelectionIndex()!=-1)
+					list_select.remove(list_select.getSelectionIndex());
+			}
+		});
+		
+		cboPrivilege.addModifyListener(new ModifyListener(){
+			@Override
+			public void modifyText(ModifyEvent e) {
+				list_project.setEnabled(true);
+				String privilege = cboPrivilege.getText();
+				if(!privilege.equals("")){
+					list_select.removeAll();
+					String priv = Tokenizer.getToken(privilege, "-", 0);
+					initSupervisor(priv);
+					
+					if(priv.equals("2") || priv.equals("1")){
+						list.setEnabled(false);
+						list_select.setEnabled(false);
+					}else{
+						list.setEnabled(true);
+						list_select.setEnabled(true);
+					}
+					
+					if(!priv.equals("4")) initProject(null);
+					
+				}
+			}
+		});
+		
+//		cboSupervisor.addModifyListener(new ModifyListener(){
+//			@Override
+//			public void modifyText(ModifyEvent e) {
+//				refreashFeatureList();
+//			}
+//		});
+	}
+
+	private void clear(){
+		editingMode = false;
+		txtID.setEnabled(true);
+		txtID.setText("");
+		txt_firstName.setText("");
+		txt_lastname.setText("");
+		list_project.setEnabled(true);
+		list_project.removeAll();
+		initLocation();
+		initProject(null);
+		initPrivilege();
+		
+		list.removeAll();
+		list_select.removeAll();
+		list_selected_manager.removeAll();
+	}
+	
+	public void addFeature(int index){
+		if(index > -1){
+			String feature = list.getItem(index);
+			String text = feature;
+			if(!helper.isExistItem(list_select, text)){
+				list_select.add(text, 0);
+			}	
+		}
+	}
+	
+	private ArrayList<String> getManagerId(){
+		String[] managers = list_selected_manager.getItems();
+		ArrayList<String> managerId = new ArrayList<String>();
+		
+		for(String m: managers){
+			managerId.add(Tokenizer.getToken(m, "-", 0));
+		}
+		
+		return managerId;
+	}
+	
+	private void refreashFeatureList() {
+		
+		if(needRefreash && list_project.getSelectionIndex()!=-1){
+			String project = list_project.getItem(list_project.getSelectionIndex());
+			String projectID =Tokenizer.getToken(project, "-", 0);
+
+			String privilege = Tokenizer.getToken(cboPrivilege.getText(), "-", 0);
+			if(privilege.equals("1") || privilege.equals("2")){
+				
+				list_select.setEnabled(true);
+				list.setEnabled(true);
+				
+				if(privilege.equals("2")){
+					list_project.setEnabled(true);
+					listFeaturesOfAllOfProject(projectID, true);
+					String[] allFeatures = list.getItems();
+					list_select.setItems(allFeatures);
+					list.selectAll();
+				}
+				
+				if(privilege.equals("1")){
+					
+					list_project.selectAll();
+					list_select.removeAll();
+					list.removeAll();
+					
+					for(String item: list_project.getItems()){
+						String currentProjectID = Tokenizer.getToken(item, "-", 0);
+						listFeaturesOfAllOfProject(currentProjectID, false);
+						String[] allFeatures = list.getItems();
+						list_select.setItems(allFeatures);
+						list.selectAll();
+					}
+					
+					list_project.selectAll();
+					list_select.setEnabled(false);
+					list.setEnabled(false);
+//					list_project.setEnabled(false);
+				}
+				
+//				list_select.setEnabled(false);
+//				list.setEnabled(false);
+				
+			}else if(privilege.equals("3")){
+				list_project.setEnabled(true);
+				list.setEnabled(true);
+				list_select.setEnabled(true);
+				String currentProjectID = Tokenizer.getToken(list_project.getItem(list_project.getSelectionIndex()), "-", 0);
+				listFeaturesOfAllOfProject(currentProjectID, true);
+			}else if(privilege.equals("4")){
+				list_project.setEnabled(true);
+				list.setEnabled(true);
+				list_select.setEnabled(true);
+				ArrayList<String> superviserID = getManagerId();
+				listFeaturesOfUser(projectID, superviserID);
+			}else if(privilege.equals("5")){
+				list_project.setEnabled(true);
+				listFeaturesOfAllOfProject(projectID, true);
+				String[] allFeatures = list.getItems();
+				list_select.setItems(allFeatures);
+				list.selectAll();
+			}
+		}
+	}
+	
+	public void listFeaturesOfUser(String projectID, String userID) {
+		String query = "";
+		query += " select a.projectid as project, b.id as id, b.name as name, b.description as description from users_feature_project_map a, feature_list b "; 
+		query += " where a.featureid = b.id and a.userid = '"+userID+"' and a.projectid = "+projectID+";";
+		Vector<String> fieldList = new Vector<String>();
+		fieldList.add("name");
+		fieldList.add("description");
+		fieldList.add("project");
+		Hashtable<Integer, String> table = initializer.getSeveralList(query, "id", fieldList);
+		helper.initList(list, table, true);
+	}
+	
+	public void listFeaturesOfUser(String projectID, ArrayList<String> userID) {
+		if(userID.size()>0){
+			String query = "";
+			query += " select a.projectid as project, b.id as id, b.name as name, b.description as description from users_feature_project_map a, feature_list b "; 
+			query += " where a.featureid = b.id and a.userid in( ";
+			
+			for(int i = 0 ; i < userID.size()-1 ; i++){
+				query += " '" +userID.get(i)+"', ";
+			}	
+			query += " '" + userID.get(userID.size()-1) + "') ";
+			query += " and a.projectid = "+projectID+";";
+			Vector<String> fieldList = new Vector<String>();
+			fieldList.add("name");
+			fieldList.add("description");
+			fieldList.add("project");
+			Hashtable<Integer, String> table = initializer.getSeveralList(query, "id", fieldList);
+			helper.initList(list, table, true);
+		}else{
+			Hashtable<Integer, String> table = new Hashtable<Integer, String>();
+			helper.initList(list, table, true);
+		}
+	}
+	
+	private void listFeaturesOfAllOfProject(String projectID, boolean remove) {
+		String query = "";
+		query += " select a.projectid as project, b.id as id, b.name as name, b.description as"
+				+ " description from project_feature_map a, feature_list b "; 
+		query += " where a.featureid = b.id and a.projectid = "+projectID+";";
+		Vector<String> fieldList = new Vector<String>();
+		
+		fieldList.add("name");
+		fieldList.add("description");
+		fieldList.add("project");
+		
+		Hashtable<Integer, String> table = initializer.getSeveralList(query, "id", fieldList);
+		helper.initList(list, table, remove);
+	}
+	
+	
+	public void editingMode(final Employee employee){
+    	if(employee != null){
+			
+			try {
+				
+				new ProgressMonitorDialog(parent.getShell()).run(true, true, new VTProgressBar(new VTJob(){
+					private int total = 0;
+					@Override
+					public void doJob(IProgressMonitor monitor) {
+						editingMode = true;
+			    		list_project.deselectAll();
+			    		list_manager.deselectAll();
+			    		list_select.removeAll();
+			    		list_selected_manager.removeAll();
+						EmployeeRetriever retriever = new EmployeeRetriever();
+						txtID.setEnabled(false);
+						txtID.setText(employee.getId());
+						txt_firstName.setText(Tokenizer.getToken(employee.getName(), " ", 0));
+						txt_lastname.setText(Tokenizer.getToken(employee.getName(), " ", 1));
+						String privilegeText = Tokenizer.concatWithDelim("-", employee.getPrivilege(), retriever.getField("name", "id", employee.getPrivilege(), "privilege", true));
+						cboPrivilege.setText(privilegeText);
+						String locationText = Tokenizer.concatWithDelim("-", employee.getLocation(), retriever.getField("name", "id", employee.getLocation(), "location", true));
+						cboLocation.setText(locationText);
+						initSupervisor(employee.getPrivilege());
+						setManager(employee.getManagerid(), employee.getManagerName());
+						
+						ArrayList<String> projectList = employee.getProjectList();
+						total = projectList.size();
+						
+						
+						for(String p: projectList){
+							setProjectSelection(p);
+							
+							ArrayList<String> featureList = employee.getFeatureList();
+							for(String feature: featureList){
+								setFeatureSelection(feature);
+								addFeature(list.getSelectionIndex());
+							}
+						}
+						
+						if(projectList.size()==0){
+							list.removeAll();
+						}
+						
+						if(employee.getPrivilege().equals("2") || employee.getPrivilege().equals("1")){
+							list.setEnabled(false);
+							list_select.setEnabled(false);
+						}else{
+							list.setEnabled(true);
+							list_select.setEnabled(true);
+						}
+					}
+
+					@Override
+					public String getTitle() {
+						return "Initialize the Selected Employee...";
+					}
+
+					@Override
+					public int getTotal() {
+						return total;
+					}
+					
+				}));
+				
+			} catch (InvocationTargetException | InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+		}
+		
+		
+	}
+	
+	
+	private void setManager(ArrayList<String> managerid, ArrayList<String> managerName) {
+		for(int i = 0; i < managerid.size(); i++){
+			String text = managerid.get(i) + "-" + managerName.get(i);
+			for(int k = 0 ; k < list_manager.getItemCount(); k++){
+				String item = list_manager.getItem(k);
+				if(item.equals(text)){
+					this.addManager(k);
+				}
+			}
+		}
+	}
+
+		
+	private void setProjectSelection(String id) {
+		for(int i = 0 ; i < this.list_project.getItemCount(); i++){
+			String projectId = Tokenizer.getToken(this.list_project.getItem(i), "-", 0);
+			if(projectId.equals(id)){
+				this.list_project.setSelection(i);
+				refreashFeatureList();
+			}
+		}
+	}
+
+	private void setFeatureSelection(String featureText) {
+		for(int i = 0 ; i < this.list.getItemCount(); i++){
+			String featureId = Tokenizer.getToken(this.list.getItem(i), "-", 0);
+			if(featureId.equals(featureText)){
+				this.list.setSelection(i);
+			}
+		}
+	}
+	
+	@Override
+	public void setFocus() {
+		// TODO Auto-generated method stub
+
+	}
+}
